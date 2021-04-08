@@ -20,6 +20,9 @@ RUN service mysql start
 
 #phpmyadmin
 
+#wordpress
+RUN tar xzvf /root/latest.tar.gz
+
 
 EXPOSE 80 443
 
