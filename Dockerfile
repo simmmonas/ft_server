@@ -13,16 +13,16 @@ RUN mkdir ~/mkcert && cd ~/mkcert && \
 	./mkcert -install && ./mkcert localhost
 
 #NGINX
-COPY /srcs/nginx.conf /root/
-RUN	mv /root/nginx.conf /etc/nginx/sites-available/localhost
-RUN	ln -s /etc/nginx/sites-available/localhost /etc/nginx/sites-enabled/
+COPY /srcs/*.conf /root/
+# RUN	mv /root/nginx.conf /etc/nginx/sites-available/localhost
+# RUN	ln -s /etc/nginx/sites-available/localhost /etc/nginx/sites-enabled/
 
 #phpmyadmin
 RUN wget https://files.phpmyadmin.net/phpMyAdmin/5.1.0/phpMyAdmin-5.1.0-all-languages.tar.gz
 RUN tar -xzvf phpMyAdmin-5.1.0-all-languages.tar.gz
 RUN mv phpMyAdmin-5.1.0-all-languages /var/www/html/phpmyadmin && \
 	rm -fr phpMyAdmin-5.1.0-all-languages.tar.gz
-COPY srcs/config.inc.php /var/www/html/myphpadmin
+COPY srcs/config.inc.php /var/www/html/phpmyadmin
 
 #wordpress
 RUN wget http://wordpress.org/latest.tar.gz
@@ -33,7 +33,7 @@ COPY srcs/wp-config.php /var/www/html/wordpress
 
 RUN	chown -R www-data:www-data /var/www/html/*
 
-COPY srcs/init.sh ./ 
+COPY srcs/*.sh ./ 
 
 EXPOSE 80 443
 
