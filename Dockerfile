@@ -1,25 +1,23 @@
 FROM debian:buster
 
+ENV AUTOINDEX on
+
 RUN apt-get -y update
 RUN apt-get -y upgrade
-RUN apt-get -y install wget
+RUN apt-get -y install nginx mariadb-server wget php-json php-mbstring php-fpm php-mysql php-xml
+
+#SSL
+RUN mkdir ~/mkcert && cd ~/mkcert && \
+	wget https://github.com/FiloSottile/mkcert/releases/download/v1.4.1/mkcert-v1.4.1-linux-amd64 && \
+	mv mkcert-v1.4.1-linux-amd64 mkcert && chmod +x mkcert && \
+	./mkcert -install && ./mkcert localhost
 
 #NGINX
-RUN apt-get -y install nginx
-COPY srcs/nginx.conf ./root/
-
-RUN service nginx start
-RUN cp /root/nginx.conf /etc/nginx/sites-available/localhost
-RUN ln -s /etc/nginx/sites-available/localhost etc/nginx/sites-enabled/
-RUN rm /etc/nginx/sites-enabled/default
-
-
-#mySQL
-RUN apt-get -y install default-mysql-server
-RUN service mysql start
+COPY /srcs/nginx.conf /root/
+RUN	mv /root/nginx.conf /etc/nginx/sites-available/localhost
+RUN	ln -s /etc/nginx/sites-available/localhost /etc/nginx/sites-enabled/
 
 #phpmyadmin
-RUN apt-get -y install php php-mysql php-fpm php-cli php-mbstring php-zip php-gd
 RUN wget https://files.phpmyadmin.net/phpMyAdmin/5.1.0/phpMyAdmin-5.1.0-all-languages.tar.gz
 RUN tar -xzvf phpMyAdmin-5.1.0-all-languages.tar.gz
 RUN mv phpMyAdmin-5.1.0-all-languages /var/www/html/phpmyadmin && \
@@ -33,17 +31,9 @@ RUN mv wordpress /var/www/html/ && \
 	rm -rf latest.tar.gz
 COPY srcs/wp-config.php /var/www/html/wordpress
 
-#SSL
-RUN wget -O mkcert https://github.com/FiloSottile/mkcert/releases/download/v1.3.0/mkcert-v1.3.0-linux-amd64
-RUN chmod +x mkcert
-RUN mv mkcert /usr/local/bin
-RUN mkcert -install
-RUN mkcert localhost
-RUN mv localhost.pem /etc/nginx/
-RUN mv localhost-key.pem /etc/ngin
+RUN	chown -R www-data:www-data /var/www/html/*
 
-
-COPY srcs/init.sh ./
+COPY srcs/init.sh ./ 
 
 EXPOSE 80 443
 
